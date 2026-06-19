@@ -1,0 +1,60 @@
+# ──────────────────────────────────────────────
+# EduSathi — .gitignore
+# ──────────────────────────────────────────────
+
+# ─── Python ───
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ─── Virtual Environment ───
+venv/
+env/
+.venv/
+.env
+
+# ─── IDE / Editor ───
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Database ───
+data/users.db
+data/users.db-journal
+*.db
+*.db-journal
+
+# ─── Vector Stores (large binary files) ───
+data/vector_stores/
+data/question_papers/
+
+# ─── Uploaded Files ───
+uploads/
+temp/
+
+# ─── Logs ───
+*.log
+
+# ─── Node / Frontend ───
+node_modules/
+frontend/dist/
+
+# ─── OS Files ───
+.DS_Store
+Desktop.ini
+ehthumbs.db
+
+# ─── Misc ───
+*.bak
+*.tmp
+*.temp
+.superpowers/

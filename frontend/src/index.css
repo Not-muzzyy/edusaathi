@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-slate-100 antialiased;
+    background-image: radial-gradient(circle at 10% 20%, rgba(108, 99, 255, 0.03) 0%, transparent 40%),
+                      radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.03) 0%, transparent 40%);
+  }
+}
+
+/* Premium Violet Glassmorphic Card styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Micro-interaction Button Glow transitions */
+.glow-btn {
+  background: linear-gradient(135deg, #6C63FF, #4ECDC4);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.glow-btn:hover {
+  transform: translate3d(0, -2px, 0) scale3d(1.03, 1.03, 1);
+  box-shadow: 0 10px 25px rgba(108, 99, 255, 0.35);
+}
+
+.glow-btn:active {
+  transform: translate3d(0, 1px, 0) scale3d(0.97, 0.97, 1);
+  box-shadow: 0 4px 10px rgba(108, 99, 255, 0.2);
+}
+
+/* Ambient Drifting Blob Layout elements */
+.ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  pointer-events: none;
+  opacity: 0.15;
+  will-change: transform;
+}
+
+/* 3D Transform rules for interactive Flashcards */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Additional premium utility animations */
+@keyframes drift-slow-1 {
+  0% { transform: translate3d(0, 0, 0) scale3d(1, 1, 1); }
+  50% { transform: translate3d(8%, 10%, 0) scale3d(1.15, 1.15, 1); }
+  100% { transform: translate3d(0, 0, 0) scale3d(1, 1, 1); }
+}
+
+@keyframes drift-slow-2 {
+  0% { transform: translate3d(0, 0, 0) scale3d(1.1, 1.1, 1); }
+  50% { transform: translate3d(-10%, -8%, 0) scale3d(0.9, 0.9, 1); }
+  100% { transform: translate3d(0, 0, 0) scale3d(1.1, 1.1, 1); }
+}
+
+@keyframes laser-flow {
+  0% { transform: translate3d(-100%, 0, 0); }
+  100% { transform: translate3d(100%, 0, 0); }
+}
+
+@keyframes button-shimmer {
+  0% { transform: translate3d(-100%, 0, 0) rotate(25deg); }
+  100% { transform: translate3d(150%, 0, 0) rotate(25deg); }
+}
+
+@keyframes draw-progress {
+  from { stroke-dashoffset: 251.2; }
+  to { stroke-dashoffset: var(--dash-offset, 0); }
+}
+
+/* Background layers */
+.cyber-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(108, 99, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(108, 99, 255, 0.035) 1px, transparent 1px);
+}
+
+/* Drifting background circles */
+.drift-blob-1 {
+  animation: drift-slow-1 18s infinite ease-in-out;
+}
+.drift-blob-2 {
+  animation: drift-slow-2 22s infinite ease-in-out;
+}
+
+/* Laser borders */
+.laser-border-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.laser-border-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #4ECDC4, #6C63FF, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.laser-border-container:hover .laser-border-line {
+  opacity: 1;
+  animation: laser-flow 3s linear infinite;
+}
+
+/* Button Shimmer */
+.shimmer-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 30%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+
+.shimmer-button:hover::after {
+  animation: button-shimmer 1.8s infinite linear;
+}
+
+/* Constellation Nodes */
+.constellation-node {
+  animation: pulse-node 3s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-node {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.3); opacity: 1; filter: drop-shadow(0 0 4px #4ECDC4); }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-scaleUp {
+  animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
