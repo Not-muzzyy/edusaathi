@@ -58,3 +58,5 @@ ehthumbs.db
 *.tmp
 *.temp
 .superpowers/
+docs/superpowers/
+package-lock.json
