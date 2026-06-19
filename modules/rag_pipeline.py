@@ -93,6 +93,13 @@ def ingest_pdf(pdf_bytes: bytes, filename: str, user_id: int, subject: str) -> d
                 pass
 
 
+@lru_cache(maxsize=10)
+def get_cached_faiss_store(store_path: str):
+    """Load and cache FAISS vector store in memory."""
+    from langchain_community.vectorstores import FAISS
+    embeddings = get_embeddings()
+    return FAISS.load_local(store_path, embeddings, allow_dangerous_deserialization=True)
+
 def retrieve_context(query: str, store_path: str, top_k: int = 5) -> str:
     """Retrieve top_k relevant chunks from FAISS store with validation."""
     try:
@@ -107,9 +114,7 @@ def retrieve_context(query: str, store_path: str, top_k: int = 5) -> str:
             logger.warning(f"Vector store corrupted at: {store_path}")
             return ""
         
-        from langchain_community.vectorstores import FAISS
-        embeddings = get_embeddings()
-        vs = FAISS.load_local(store_path, embeddings, allow_dangerous_deserialization=True)
+        vs = get_cached_faiss_store(store_path)
         docs = vs.similarity_search(query, k=top_k)
         
         if not docs:

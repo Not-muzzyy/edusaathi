@@ -84,6 +84,15 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_quiz_user ON quiz_attempts(user_id, subject);
         CREATE INDEX IF NOT EXISTS idx_progress_user ON topic_progress(user_id);
         CREATE INDEX IF NOT EXISTS idx_study_tasks_date ON study_tasks(date);
+        
+        CREATE TABLE IF NOT EXISTS chat_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER REFERENCES users(id),
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_chat_history_user ON chat_history(user_id);
     """)
     conn.commit()
     conn.close()
@@ -238,3 +247,23 @@ def get_all_quiz_attempts():
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+def save_chat_message(user_id: int, role: str, content: str):
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO chat_history (user_id, role, content) VALUES (?, ?, ?)",
+        (user_id, role, content)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_chat_history(user_id: int, limit: int = 50) -> list:
+    conn = get_conn()
+    rows = conn.execute(
+        "SELECT role, content FROM chat_history WHERE user_id = ? ORDER BY created_at ASC LIMIT ?",
+        (user_id, limit)
+    ).fetchall()
+    conn.close()
+    return [{"role": r["role"], "content": r["content"]} for r in rows]

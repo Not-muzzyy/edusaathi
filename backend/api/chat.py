@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
 from modules.rag_pipeline import ingest_pdf
 from modules.llm_client import chat, analyze_question_paper
-from modules.auth import save_document_record, get_user_documents
+from modules.auth import save_document_record, get_user_documents, save_chat_message, get_chat_history
 from modules.validation import safe_retrieve_context
 from typing import List, Optional
 import pdfplumber
@@ -58,9 +58,22 @@ def query_tutor(req: ChatRequest):
         
         # Invoke LLM chat response
         response_text = chat(context, req.question, history_list)
+        
+        # Save chat messages to database for persistence
+        save_chat_message(req.user_id, "user", req.question)
+        save_chat_message(req.user_id, "assistant", response_text)
+        
         return {"response": response_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI query failed: {str(e)}")
+
+@router.get("/history/{user_id}")
+def get_history(user_id: int):
+    try:
+        history = get_chat_history(user_id)
+        return {"history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch chat history: {str(e)}")
 
 @router.get("/documents/{user_id}")
 def get_documents(user_id: int):

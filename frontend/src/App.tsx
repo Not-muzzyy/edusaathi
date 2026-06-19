@@ -1502,6 +1502,23 @@ function ChatTutor({ user, docs, onRefresh, showToast }: { user: User; docs: Doc
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   
+  const messagesEndRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    fetch(`/api/chat/history/${user.id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.history && data.history.length > 0) {
+          setMessages(data.history)
+        }
+      })
+      .catch(err => console.error("Failed to load chat history", err))
+  }, [user.id])
+
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
   // Document uploads fields
   const [subjectTag, setSubjectTag] = useState('')
   const [fileToUpload, setFileToUpload] = useState<File | null>(null)
@@ -1777,6 +1794,7 @@ function ChatTutor({ user, docs, onRefresh, showToast }: { user: User; docs: Doc
                   </div>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Form input */}
