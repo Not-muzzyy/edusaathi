@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   LayoutDashboard, MessageSquareCode, Award, Clock, Layers, 
   TrendingUp, Users, ShieldAlert, GraduationCap, LogOut, 
@@ -1502,9 +1502,9 @@ function ChatTutor({ user, docs, onRefresh, showToast }: { user: User; docs: Doc
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   
-  const messagesEndRef = React.useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch(`/api/chat/history/${user.id}`)
       .then(res => res.json())
       .then(data => {
@@ -1515,7 +1515,7 @@ function ChatTutor({ user, docs, onRefresh, showToast }: { user: User; docs: Doc
       .catch(err => console.error("Failed to load chat history", err))
   }, [user.id])
 
-  React.useEffect(() => {
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
