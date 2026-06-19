@@ -8,7 +8,7 @@
 </p>
 
 <h1 align="center">🎓 EduSathi</h1>
-<h3 align="center">AI-Powered Study Companion for VSKUB Students</h3>
+<h3 align="center">AI-Powered Study Companion for Everyone</h3>
 
 <p align="center">
   <strong>⚠️ This project is under active development — features may change, break, or be incomplete.</strong>
@@ -317,5 +317,5 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 ---
 
 <p align="center">
-  Built with ❤️ for VSKUB Students
+  Built with ❤️ for Everyone
 </p>
