@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { 
   LayoutDashboard, MessageSquareCode, Award, Clock, Layers, 
   TrendingUp, Users, ShieldAlert, GraduationCap, LogOut, 
@@ -1059,9 +1059,20 @@ function StudyPlanner({ user, showToast, setTab }: StudyPlannerProps) {
     }
   }
 
+  // ⚡ Bolt: Memoize tasks by date to replace O(N * Days) nested loop filtering with O(1) hash map lookups
+  // Reduces re-renders computation significantly in the monthly calendar grid view
+  const tasksByDate = useMemo(() => {
+    const map: Record<string, StudyTask[]> = {}
+    tasks.forEach(t => {
+      if (!map[t.date]) map[t.date] = []
+      map[t.date].push(t)
+    })
+    return map
+  }, [tasks])
+
   const getTasksForDay = (dayNum: number) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
-    return tasks.filter(t => t.date === dateStr)
+    return tasksByDate[dateStr] || []
   }
 
   return (
