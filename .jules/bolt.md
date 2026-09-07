@@ -1,3 +1,3 @@
-## 2024-05-24 - O(n²) Calendar Filtering Pattern
-**Learning:** Found an `O(N * Days)` nested loop bottleneck during calendar rendering in the `StudyPlanner` component. Specifically, rendering each day in the month view filters the entire `tasks` array (up to N tasks) `Days` number of times (`30+` times per render) using `.filter()`. This leads to poor performance on renders with many tasks.
-**Action:** Always map array data to an `O(1)` dictionary lookup (`Record<string, Task[]>`) using `useMemo` before iterating and querying the array in nested loops (like days in a month calendar).
+## 2026-09-06 - O(N²) Calendar Grid Rendering Bottleneck
+**Learning:** In React components that render large grids (like calendars), avoid repeatedly mapping or filtering over the same array for every grid cell inside the render cycle. In the `StudyPlanner` component, `tasks.filter()` was being called inside the mapping for each day in a month, leading to O(N * M) (where N is days in a month, M is total tasks) time complexity during renders, causing performance degradation as tasks accumulated.
+**Action:** Use `useMemo` to construct an O(N) lookup hash map (e.g. `Map<string, Task[]>`) grouped by date string once per tasks array update, then perform O(1) lookups for each grid cell.

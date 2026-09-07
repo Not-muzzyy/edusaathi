@@ -81,10 +81,6 @@ def google_login(req: GoogleLoginRequest):
         row = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         if row:
             user_data = dict(row)
-            if user_data.get("role") != "student":
-                conn.execute("UPDATE users SET role = 'student' WHERE id = ?", (user_data["id"],))
-                conn.commit()
-                user_data["role"] = "student"
         else:
             # Create a new user with Google details
             import bcrypt
