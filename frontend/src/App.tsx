@@ -157,25 +157,23 @@ export default function App() {
   const fetchUserData = async () => {
     if (!user) return
     try {
-      // ⚡ Bolt: Batching API calls with Promise.all to prevent network waterfall.
-      // Expected Impact: Reduces total fetch time from O(t1+t2+t3) to O(max(t1,t2,t3)), speeding up dashboard load.
-      const [docRes, dashRes, fcRes] = await Promise.all([
-        fetch(`/api/chat/documents/${user.id}`),
-        fetch(`/api/analytics/dashboard/${user.id}`),
-        fetch(`/api/flashcards/${user.id}`)
-      ])
-
+      // Fetch user docs
+      const docRes = await fetch(`/api/chat/documents/${user.id}`)
       if (docRes.ok) {
         const data = await docRes.json()
         setDocuments(data.documents || [])
       }
 
+      // Fetch dashboard metrics and mastery
+      const dashRes = await fetch(`/api/analytics/dashboard/${user.id}`)
       if (dashRes.ok) {
         const data = await dashRes.json()
         setMasteryData(data.stats?.progress || [])
         setQuizAttempts(data.stats?.history || [])
       }
 
+      // Fetch flashcards
+      const fcRes = await fetch(`/api/flashcards/${user.id}`)
       if (fcRes.ok) {
         const data = await fcRes.json()
         setFlashcards(data.flashcards || [])

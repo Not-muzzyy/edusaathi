@@ -1,7 +1,3 @@
 ## 2026-09-06 - O(N²) Calendar Grid Rendering Bottleneck
 **Learning:** In React components that render large grids (like calendars), avoid repeatedly mapping or filtering over the same array for every grid cell inside the render cycle. In the `StudyPlanner` component, `tasks.filter()` was being called inside the mapping for each day in a month, leading to O(N * M) (where N is days in a month, M is total tasks) time complexity during renders, causing performance degradation as tasks accumulated.
 **Action:** Use `useMemo` to construct an O(N) lookup hash map (e.g. `Map<string, Task[]>`) grouped by date string once per tasks array update, then perform O(1) lookups for each grid cell.
-
-## 2024-05-24 - [Parallelize Independent Fetch Calls]
-**Learning:** React initial load speed can be significantly dragged down by independent API calls running sequentially due to back-to-back awaits.
-**Action:** Use Promise.all to fetch them simultaneously.
