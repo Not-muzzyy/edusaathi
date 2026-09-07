@@ -3209,4 +3209,3 @@ function PaperAnalysis({ user, showToast }: { user: User; showToast: any }) {
   )
 }
 
-
