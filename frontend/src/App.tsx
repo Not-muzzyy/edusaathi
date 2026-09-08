@@ -2781,6 +2781,11 @@ function FlashcardDeck({ user, docs, cards, onRefresh, showToast }: { user: User
 /* PAGE: PROGRESS ANALYTICS & PDF REPORT                                     */
 /* ========================================================================= */
 function ProgressAnalytics({ user, mastery, attempts }: { user: User; mastery: TopicProgress[]; attempts: QuizAttempt[] }) {
+  // 💡 What: Replaced multiple O(N) array filtering calls inside render with O(N) useMemo arrays.
+  // 🎯 Why: Previously, mastery.filter() ran multiple times during every render of the analytics dashboard, which could be slow with many topics.
+  const strongTopics = useMemo(() => mastery.filter(m => m.mastery_score >= 0.8), [mastery]);
+  const weakTopics = useMemo(() => mastery.filter(m => m.mastery_score < 0.5), [mastery]);
+
   const downloadReport = () => {
     window.open(`/api/analytics/export-pdf/${user.id}/${encodeURIComponent(user.name)}`, '_blank')
   }
@@ -2865,10 +2870,10 @@ function ProgressAnalytics({ user, mastery, attempts }: { user: User; mastery: T
               <Award className="w-4 h-4 mr-1.5 text-tealAccent" /> Strong Areas
             </h4>
             <div className="flex flex-col gap-2 mt-1">
-              {mastery.filter(m => m.mastery_score >= 0.8).length === 0 ? (
+              {strongTopics.length === 0 ? (
                 <span className="text-slate-500 text-xs">No topics mastered yet.</span>
               ) : (
-                mastery.filter(m => m.mastery_score >= 0.8).map((m, idx) => (
+                strongTopics.map((m, idx) => (
                   <span key={idx} className="text-xs text-slate-300 bg-tealAccent/5 border border-tealAccent/20 px-2 py-1.5 rounded-lg font-semibold flex items-center">
                     <Sparkles className="w-3.5 h-3.5 mr-1.5 text-yellow-400 shrink-0" /> {m.topic}
                   </span>
@@ -2882,10 +2887,10 @@ function ProgressAnalytics({ user, mastery, attempts }: { user: User; mastery: T
               <AlertTriangle className="w-4 h-4 mr-1.5 text-rose-400" /> Target Areas to Practice
             </h4>
             <div className="flex flex-col gap-2 mt-1">
-              {mastery.filter(m => m.mastery_score < 0.5).length === 0 ? (
+              {weakTopics.length === 0 ? (
                 <span className="text-slate-500 text-xs">All areas stable. Good job!</span>
               ) : (
-                mastery.filter(m => m.mastery_score < 0.5).map((m, idx) => (
+                weakTopics.map((m, idx) => (
                   <span key={idx} className="text-xs text-slate-300 bg-rose-500/5 border border-rose-500/20 px-2 py-1.5 rounded-lg font-semibold flex items-center">
                     <FileText className="w-3.5 h-3.5 mr-1.5 text-rose-400 shrink-0" /> {m.topic}
                   </span>
