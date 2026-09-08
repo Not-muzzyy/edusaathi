@@ -6,6 +6,7 @@ import os
 import re
 from pathlib import Path
 from typing import Optional, Tuple
+from modules.rag_pipeline import VECTOR_DIR
 
 
 def validate_vector_store(store_path: str) -> Tuple[bool, str]:
@@ -16,6 +17,14 @@ def validate_vector_store(store_path: str) -> Tuple[bool, str]:
     if not store_path:
         return False, "Vector store path is empty"
     
+    # Path traversal validation
+    abs_store = os.path.abspath(store_path)
+    abs_vector_dir = os.path.abspath(VECTOR_DIR)
+
+    # Ensure the path is strictly within VECTOR_DIR
+    if os.path.commonpath([abs_vector_dir, abs_store]) != abs_vector_dir:
+        return False, "Invalid path: must be within vector store directory."
+
     if not os.path.exists(store_path):
         return False, f"Vector store not found at {store_path}. Document may be corrupted."
     
