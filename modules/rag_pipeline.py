@@ -97,13 +97,30 @@ def ingest_pdf(pdf_bytes: bytes, filename: str, user_id: int, subject: str) -> d
 def get_cached_faiss_store(store_path: str):
     """Load and cache FAISS vector store in memory."""
     from langchain_community.vectorstores import FAISS
+
+    # Security: Validate store_path to prevent path traversal before dangerous deserialization
+    abs_store = os.path.realpath(store_path)
+    abs_vector_dir = os.path.realpath(VECTOR_DIR)
+    if os.path.commonpath([abs_vector_dir, abs_store]) != abs_vector_dir:
+        raise ValueError(f"Invalid store_path: {store_path}. Must be within {VECTOR_DIR}.")
+
     embeddings = get_embeddings()
     return FAISS.load_local(store_path, embeddings, allow_dangerous_deserialization=True)
 
 def retrieve_context(query: str, store_path: str, top_k: int = 5) -> str:
     """Retrieve top_k relevant chunks from FAISS store with validation."""
     try:
-        if not store_path or not os.path.exists(store_path):
+        if not store_path:
+            return ""
+
+        # Security: Validate store_path to prevent path traversal
+        abs_store = os.path.realpath(store_path)
+        abs_vector_dir = os.path.realpath(VECTOR_DIR)
+        if os.path.commonpath([abs_vector_dir, abs_store]) != abs_vector_dir:
+            logger.warning(f"Path traversal attempt blocked: {store_path}")
+            return ""
+
+        if not os.path.exists(store_path):
             logger.warning(f"Vector store not found: {store_path}")
             return ""
         
