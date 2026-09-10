@@ -95,7 +95,12 @@ def ingest_pdf(pdf_bytes: bytes, filename: str, user_id: int, subject: str) -> d
 
 @lru_cache(maxsize=10)
 def get_cached_faiss_store(store_path: str):
-    """Load and cache FAISS vector store in memory."""
+    """Load and cache FAISS vector store in memory with path traversal protection."""
+    abs_store = os.path.abspath(store_path)
+    abs_vector_dir = os.path.abspath(VECTOR_DIR)
+    if os.path.commonpath([abs_vector_dir, abs_store]) != abs_vector_dir:
+        raise ValueError(f"Invalid store_path: {store_path}. Potential path traversal detected.")
+
     from langchain_community.vectorstores import FAISS
     embeddings = get_embeddings()
     return FAISS.load_local(store_path, embeddings, allow_dangerous_deserialization=True)
