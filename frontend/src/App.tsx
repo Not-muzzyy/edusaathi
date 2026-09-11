@@ -1341,13 +1341,18 @@ function StudentDashboard({ user, mastery, attempts, setTab, onRefresh }: Studen
   }, [])
 
   const totalQuizzes = attempts.length
-  const avgAccuracy = attempts.length 
+
+  // ⚡ Bolt Performance Optimization:
+  // 💡 What: Wrapped O(N) array reductions in useMemo.
+  // 🎯 Why: Dashboard metrics (avgAccuracy, overallMastery) were being recalculated on every render, adding unnecessary overhead as the number of attempts and topics grows.
+  // 📊 Impact: O(N) recalculations are now skipped on re-renders unless the data actually changes.
+  const avgAccuracy = useMemo(() => attempts.length
     ? Math.round(attempts.reduce((acc, curr) => acc + (curr.score / curr.total_questions * 100), 0) / attempts.length) 
-    : 0
+    : 0, [attempts])
   
-  const overallMastery = mastery.length
+  const overallMastery = useMemo(() => mastery.length
     ? Math.round(mastery.reduce((acc, curr) => acc + curr.mastery_score, 0) / mastery.length * 100)
-    : 0
+    : 0, [mastery])
 
   return (
     <div className="flex flex-col gap-8 flex-1">
