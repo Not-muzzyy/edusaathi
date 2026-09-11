@@ -102,7 +102,14 @@ def get_cached_faiss_store(store_path: str):
 
 def retrieve_context(query: str, store_path: str, top_k: int = 5) -> str:
     """Retrieve top_k relevant chunks from FAISS store with validation."""
+    from modules.validation import validate_vector_store
+
     try:
+        is_valid, err_msg = validate_vector_store(store_path)
+        if not is_valid:
+            logger.warning(f"Vector store validation failed for {store_path}: {err_msg}")
+            return ""
+
         if not store_path or not os.path.exists(store_path):
             logger.warning(f"Vector store not found: {store_path}")
             return ""
