@@ -179,6 +179,24 @@ def save_quiz_attempt(user_id, subject, topic, score, total, difficulty, answers
     conn.close()
 
 
+def get_quiz_aggregates(user_id):
+    conn = get_conn()
+    row = conn.execute('''
+        SELECT
+            COUNT(id) as total_quizzes,
+            SUM(score) as total_score,
+            SUM(total_questions) as total_questions
+        FROM quiz_attempts
+        WHERE user_id = ?
+    ''', (user_id,)).fetchone()
+    conn.close()
+    return {
+        "total_quizzes": row["total_quizzes"] if row["total_quizzes"] else 0,
+        "total_score": row["total_score"] if row["total_score"] else 0,
+        "total_questions": row["total_questions"] if row["total_questions"] else 0
+    }
+
+
 def get_quiz_history(user_id):
     conn = get_conn()
     rows = conn.execute(
