@@ -83,6 +83,7 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
         CREATE INDEX IF NOT EXISTS idx_quiz_user ON quiz_attempts(user_id, subject);
         CREATE INDEX IF NOT EXISTS idx_progress_user ON topic_progress(user_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_topic_progress_lookup ON topic_progress(user_id, subject, topic);
         CREATE INDEX IF NOT EXISTS idx_study_tasks_date ON study_tasks(date);
         
         CREATE TABLE IF NOT EXISTS chat_history (
@@ -167,6 +168,16 @@ def get_user_documents(user_id):
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+def get_single_topic_progress(user_id, subject, topic):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT mastery_score FROM topic_progress WHERE user_id = ? AND subject = ? AND topic = ?",
+        (user_id, subject, topic)
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
 
 
 def save_quiz_attempt(user_id, subject, topic, score, total, difficulty, answers_json):
