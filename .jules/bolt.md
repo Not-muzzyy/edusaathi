@@ -4,3 +4,7 @@
 ## 2023-11-20 - O(N) Array Reduction Rendering Bottleneck
 **Learning:** In React components that render dashboards with aggregated metrics (like average accuracy or overall mastery), avoid repeatedly running O(N) array reductions inside the render cycle. In the `StudentDashboard` component, `attempts.reduce()` and `mastery.reduce()` were being called for every render, causing performance degradation as the number of attempts and topics grew.
 **Action:** Use `useMemo` to cache the results of O(N) array reductions, so they are only recalculated when the underlying data (`attempts` or `mastery`) actually changes.
+
+## 2026-09-15 - [Database Batched Operations]
+**Learning:** Using .executemany for saving multiple chat messages significantly reduces DB connection overhead in conversational endpoints.
+**Action:** Always batch related database write operations into a single transaction instead of repeated single inserts.

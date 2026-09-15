@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
 from modules.rag_pipeline import ingest_pdf
 from modules.llm_client import chat, analyze_question_paper
-from modules.auth import save_document_record, get_user_documents, save_chat_message, get_chat_history
+from modules.auth import save_document_record, get_user_documents, save_chat_messages, get_chat_history
 from modules.validation import safe_retrieve_context
 from typing import List, Optional
 import pdfplumber
@@ -59,9 +59,11 @@ def query_tutor(req: ChatRequest):
         # Invoke LLM chat response
         response_text = chat(context, req.question, history_list)
         
-        # Save chat messages to database for persistence
-        save_chat_message(req.user_id, "user", req.question)
-        save_chat_message(req.user_id, "assistant", response_text)
+        # Save chat messages to database for persistence in a single batch
+        save_chat_messages([
+            (req.user_id, "user", req.question),
+            (req.user_id, "assistant", response_text)
+        ])
         
         return {"response": response_text}
     except Exception as e:

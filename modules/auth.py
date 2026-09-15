@@ -258,6 +258,20 @@ def save_chat_message(user_id: int, role: str, content: str):
     conn.commit()
     conn.close()
 
+# ⚡ Bolt Performance Optimization:
+# 💡 What: Added batch insert function using .executemany
+# 🎯 Why: Repeatedly opening and closing DB connections for individual messages causes unnecessary IO overhead and latency during chat interactions.
+# 📊 Impact: Consolidates multiple INSERTs into a single connection and transaction, halving the database connection overhead for conversational endpoints.
+def save_chat_messages(messages: list[tuple[int, str, str]]):
+    if not messages:
+        return
+    conn = get_conn()
+    conn.executemany(
+        "INSERT INTO chat_history (user_id, role, content) VALUES (?, ?, ?)",
+        messages
+    )
+    conn.commit()
+    conn.close()
 
 def get_chat_history(user_id: int, limit: int = 50) -> list:
     conn = get_conn()
