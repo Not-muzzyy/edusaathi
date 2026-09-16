@@ -31,6 +31,7 @@ class GoogleLoginRequest(BaseModel):
 @router.post("/google-login")
 def google_login(req: GoogleLoginRequest):
     import urllib.request
+    import urllib.parse
     import json
     import os
     
@@ -40,13 +41,14 @@ def google_login(req: GoogleLoginRequest):
 
     # Securely validate the token via Google's tokeninfo/userinfo API
     try:
+        safe_token = urllib.parse.quote(token)
         if req.is_access_token:
-            url = f"https://www.googleapis.com/oauth2/v3/userinfo?access_token={token}"
+            url = f"https://www.googleapis.com/oauth2/v3/userinfo?access_token={safe_token}"
         else:
-            url = f"https://oauth2.googleapis.com/tokeninfo?id_token={token}"
+            url = f"https://oauth2.googleapis.com/tokeninfo?id_token={safe_token}"
             
         req_obj = urllib.request.Request(url, method="GET")
-        with urllib.request.urlopen(req_obj) as response:
+        with urllib.request.urlopen(req_obj, timeout=10) as response:
             status = response.getcode()
             response_body = response.read().decode('utf-8')
             
@@ -104,6 +106,6 @@ def google_login(req: GoogleLoginRequest):
         return {"user": user_data, "is_new_user": not row}
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error during Google login: {str(e)}")
+        raise HTTPException(status_code=500, detail="An internal server error occurred during login. Please try again later.")
     finally:
         conn.close()
