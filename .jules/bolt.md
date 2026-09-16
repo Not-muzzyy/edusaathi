@@ -4,3 +4,6 @@
 ## 2023-11-20 - O(N) Array Reduction Rendering Bottleneck
 **Learning:** In React components that render dashboards with aggregated metrics (like average accuracy or overall mastery), avoid repeatedly running O(N) array reductions inside the render cycle. In the `StudentDashboard` component, `attempts.reduce()` and `mastery.reduce()` were being called for every render, causing performance degradation as the number of attempts and topics grew.
 **Action:** Use `useMemo` to cache the results of O(N) array reductions, so they are only recalculated when the underlying data (`attempts` or `mastery`) actually changes.
+## 2025-02-20 - O(N+1) Update Query Bottleneck in Database Routines
+**Learning:** In backend endpoints (like `/reschedule`), performing an O(N) loop to process updates derived from a preliminary SELECT query creates an N+1 query problem, which severely impacts database performance as user data grows.
+**Action:** Replace sequential SELECT-then-UPDATE looping with a single batched UPDATE query combining the previous search logic into the `WHERE` clause, cutting operations from O(N) down to O(1).

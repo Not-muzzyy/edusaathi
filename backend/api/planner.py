@@ -149,21 +149,16 @@ def reschedule_tasks(user_id: int):
         
         today_str = datetime.now().date().strftime("%Y-%m-%d")
         
-        # Find past incomplete tasks
+        # 💡 Bolt Performance Optimization:
+        # Replaced N+1 SELECT then N UPDATE queries with a single batch UPDATE query to fix the N+1 issue.
+        # This reduces database operations from O(N) to O(1) when rescheduling past incomplete tasks.
         cursor.execute(
-            "SELECT id FROM study_tasks WHERE plan_id = ? AND date < ? AND completed = 0",
-            (plan_id, today_str)
+            "UPDATE study_tasks SET date = ? WHERE plan_id = ? AND date < ? AND completed = 0",
+            (today_str, plan_id, today_str)
         )
-        past_incompletes = [r[0] for r in cursor.fetchall()]
-        
-        # Shift all past incomplete tasks to today's date
-        for tid in past_incompletes:
-            cursor.execute(
-                "UPDATE study_tasks SET date = ? WHERE id = ?",
-                (today_str, tid)
-            )
+        shifted_count = cursor.rowcount
         conn.commit()
-        return {"status": "success", "shifted_count": len(past_incompletes)}
+        return {"status": "success", "shifted_count": shifted_count}
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
