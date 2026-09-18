@@ -4,3 +4,6 @@
 ## 2023-11-20 - O(N) Array Reduction Rendering Bottleneck
 **Learning:** In React components that render dashboards with aggregated metrics (like average accuracy or overall mastery), avoid repeatedly running O(N) array reductions inside the render cycle. In the `StudentDashboard` component, `attempts.reduce()` and `mastery.reduce()` were being called for every render, causing performance degradation as the number of attempts and topics grew.
 **Action:** Use `useMemo` to cache the results of O(N) array reductions, so they are only recalculated when the underlying data (`attempts` or `mastery`) actually changes.
+## 2024-05-18 - Avoid loading all user progress for specific topic update
+**Learning:** In `modules/progress_tracker.py`, updating the mastery score for a single topic was doing an O(N) fetch of all topics a user has studied, then iterating over them in memory just to find the specific topic's mastery score. This scales poorly as the user completes more topics.
+**Action:** Always prefer an O(1) specific database fetch using a query with the proper WHERE clause instead of loading a large list of data into memory just to search it.
