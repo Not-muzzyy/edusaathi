@@ -10,9 +10,11 @@ init_db()
 app = FastAPI(title="EduSathi API", version="2.0.0")
 
 # Enable CORS for frontend interaction
+# SECURITY: restrict allow_origins to prevent CSRF when allow_credentials=True
+frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[frontend_url],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
