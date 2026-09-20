@@ -149,21 +149,21 @@ def reschedule_tasks(user_id: int):
         
         today_str = datetime.now().date().strftime("%Y-%m-%d")
         
-        # Find past incomplete tasks
+        # ⚡ Bolt Performance Optimization:
+        # 💡 What: Replaced SELECT + N UPDATE statements with a single bulk UPDATE query.
+        # 🎯 Why: The original code suffered from an N+1 query bottleneck by looping through and individually updating each past incomplete task.
+        # 📊 Impact: Eliminates O(N) database roundtrips, reducing latency and DB load for users with many past tasks.
+        # 🔬 Measurement: Observe lower execution time of the /reschedule endpoint during heavy load tests.
+
+        # Bulk shift all past incomplete tasks to today's date
         cursor.execute(
-            "SELECT id FROM study_tasks WHERE plan_id = ? AND date < ? AND completed = 0",
-            (plan_id, today_str)
+            "UPDATE study_tasks SET date = ? WHERE plan_id = ? AND date < ? AND completed = 0",
+            (today_str, plan_id, today_str)
         )
-        past_incompletes = [r[0] for r in cursor.fetchall()]
+        shifted_count = cursor.rowcount
         
-        # Shift all past incomplete tasks to today's date
-        for tid in past_incompletes:
-            cursor.execute(
-                "UPDATE study_tasks SET date = ? WHERE id = ?",
-                (today_str, tid)
-            )
         conn.commit()
-        return {"status": "success", "shifted_count": len(past_incompletes)}
+        return {"status": "success", "shifted_count": shifted_count}
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
