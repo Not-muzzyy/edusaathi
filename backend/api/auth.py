@@ -73,6 +73,12 @@ def google_login(req: GoogleLoginRequest):
     if not email_verified:
         raise HTTPException(status_code=400, detail="Google email is not verified")
 
+    # Verify Audience (Confused Deputy protection)
+    expected_aud = os.environ.get("VITE_GOOGLE_CLIENT_ID")
+    aud = token_info.get("aud")
+    if expected_aud and aud and aud != expected_aud:
+        raise HTTPException(status_code=400, detail="Invalid token audience (Confused Deputy protection)")
+
     # Connect to SQLite database to find or insert user
     from modules.auth import get_conn
     conn = get_conn()
