@@ -58,6 +58,13 @@ def google_login(req: GoogleLoginRequest):
         raise HTTPException(status_code=400, detail=f"Google token validation error: {str(e)}")
 
     # Verify basic token claims
+    # SECURITY: Verify the audience claim to prevent Confused Deputy vulnerability
+    if not req.is_access_token:
+        expected_client_id = os.environ.get("VITE_GOOGLE_CLIENT_ID", "278457635677-mockgoogleclientid.apps.googleusercontent.com")
+        aud = token_info.get("aud")
+        if not aud or aud != expected_client_id:
+            raise HTTPException(status_code=400, detail="Invalid token audience (aud claim mismatch)")
+
     email = token_info.get("email")
     email_verified = token_info.get("email_verified")
     name = token_info.get("name", "Google User")
