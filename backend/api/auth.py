@@ -58,6 +58,11 @@ def google_login(req: GoogleLoginRequest):
         raise HTTPException(status_code=400, detail=f"Google token validation error: {str(e)}")
 
     # Verify basic token claims
+    aud = token_info.get("aud")
+    expected_aud = os.environ.get("VITE_GOOGLE_CLIENT_ID")
+    if expected_aud and aud != expected_aud:
+        raise HTTPException(status_code=400, detail="Invalid token audience (Confused Deputy protection)")
+
     email = token_info.get("email")
     email_verified = token_info.get("email_verified")
     name = token_info.get("name", "Google User")
