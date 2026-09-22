@@ -1,5 +1,5 @@
 """modules/progress_tracker.py — Analytics computations."""
-from modules.auth import get_quiz_history, get_topic_progress, upsert_topic_progress
+from modules.auth import get_quiz_history, get_topic_progress, upsert_topic_progress, get_specific_topic_progress
 import json
 
 
@@ -8,8 +8,14 @@ def update_progress_from_result(user_id, subject, topic, score, total):
     if total == 0:
         return
     new_score = score / total
-    existing = get_topic_progress(user_id)
-    old = next((r for r in existing if r["subject"] == subject and r["topic"] == topic), None)
+
+    # ⚡ Bolt Performance Optimization:
+    # 💡 What: Replaced O(N) database fetch and O(N) Python array linear search with a single O(1) targeted database query.
+    # 🎯 Why: Previously, updating a single topic's progress required loading ALL topic progresses for a user into memory and linearly scanning them, creating an O(N) bottleneck that slowed down quiz submissions as user history grew.
+    # 📊 Impact: Eliminates O(N) DB to app data transfer and O(N) compute, speeding up the quiz submission endpoint.
+    # 🔬 Measurement: Observe lower execution time in `update_progress_from_result` for users with extensive quiz history.
+    old = get_specific_topic_progress(user_id, subject, topic)
+
     if old:
         mastery = round(0.7 * old["mastery_score"] + 0.3 * new_score, 3)
     else:

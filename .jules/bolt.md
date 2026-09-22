@@ -7,3 +7,6 @@
 ## 2026-09-07 - N+1 Query in Bulk Updates
 **Learning:** In backend endpoints performing bulk status changes (like rescheduling multiple tasks), avoid fetching the target IDs with a `SELECT` and then looping in application logic to execute `UPDATE` statements for each item. This creates an N+1 query bottleneck.
 **Action:** Use a single bulk `UPDATE` SQL statement specifying the exact criteria in the `WHERE` clause, and use `cursor.rowcount` to determine the number of updated records.
+## 2026-09-22 - O(N) Database to Python Linear Search Bottleneck
+**Learning:** In backend endpoints processing individual events (like a quiz submission updating a single topic progress), avoid fetching ALL historical records for a user from the database into memory only to scan them linearly with Python to find a single match. This creates an O(N) bottleneck that severely degrades API response times as the user's data grows over time.
+**Action:** Replace `SELECT * FROM table WHERE user_id = ?` followed by a Python generator expression `next(r for r in rows if r["id"] == target)` with a targeted O(1) query `SELECT column FROM table WHERE user_id = ? AND id = target LIMIT 1`.
