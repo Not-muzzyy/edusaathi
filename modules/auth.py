@@ -169,6 +169,16 @@ def get_user_documents(user_id):
     return [dict(r) for r in rows]
 
 
+def get_specific_topic_progress(user_id, subject, topic):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT mastery_score FROM topic_progress WHERE user_id = ? AND subject = ? AND topic = ?",
+        (user_id, subject, topic)
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def save_quiz_attempt(user_id, subject, topic, score, total, difficulty, answers_json):
     conn = get_conn()
     conn.execute(
