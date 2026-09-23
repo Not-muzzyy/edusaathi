@@ -61,6 +61,14 @@ def google_login(req: GoogleLoginRequest):
     email = token_info.get("email")
     email_verified = token_info.get("email_verified")
     name = token_info.get("name", "Google User")
+    aud = token_info.get("aud")
+
+    # SECURITY: Prevent Confused Deputy vulnerability by verifying the audience
+    expected_client_id = os.environ.get("VITE_GOOGLE_CLIENT_ID")
+    if not expected_client_id:
+        raise HTTPException(status_code=500, detail="Server misconfiguration: Google Client ID not set")
+    if aud != expected_client_id:
+        raise HTTPException(status_code=400, detail="Google token audience mismatch")
     
     if not email:
         raise HTTPException(status_code=400, detail="Google token does not contain email")
