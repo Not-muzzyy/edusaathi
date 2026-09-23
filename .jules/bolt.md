@@ -7,3 +7,6 @@
 ## 2026-09-07 - N+1 Query in Bulk Updates
 **Learning:** In backend endpoints performing bulk status changes (like rescheduling multiple tasks), avoid fetching the target IDs with a `SELECT` and then looping in application logic to execute `UPDATE` statements for each item. This creates an N+1 query bottleneck.
 **Action:** Use a single bulk `UPDATE` SQL statement specifying the exact criteria in the `WHERE` clause, and use `cursor.rowcount` to determine the number of updated records.
+## 2026-09-08 - O(N) Database Roundtrips in Loops
+**Learning:** When executing multiple INSERTs or UPDATEs on a database connection (e.g. SQLite), executing queries individually within a loop causes excessive overhead (N-1 additional network or I/O roundtrips and statement parsing overhead) when creating many items at once, such as during bulk flashcard generation.
+**Action:** Prepare a list of tuples with the necessary data first and utilize `cursor.executemany()` to batch the inserts in a single database roundtrip.
