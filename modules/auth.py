@@ -221,11 +221,20 @@ def get_topic_progress(user_id):
 
 def save_flashcards(user_id, document_id, cards: list):
     conn = get_conn()
-    for card in cards:
-        conn.execute(
-            "INSERT INTO flashcards (user_id, document_id, front, back) VALUES (?,?,?,?)",
-            (user_id, document_id, card.get("front", ""), card.get("back", ""))
-        )
+
+    # ⚡ Bolt Performance Optimization:
+    # 💡 What: Replaced individual INSERT queries inside a loop with a single executemany call.
+    # 🎯 Why: Previously, saving flashcards required N database roundtrips, causing unnecessary overhead when inserting a large deck of cards.
+    # 📊 Impact: Eliminates N-1 database roundtrips, reducing I/O wait time during flashcard generation.
+    flashcards_data = [
+        (user_id, document_id, card.get("front", ""), card.get("back", ""))
+        for card in cards
+    ]
+    conn.executemany(
+        "INSERT INTO flashcards (user_id, document_id, front, back) VALUES (?,?,?,?)",
+        flashcards_data
+    )
+
     conn.commit()
     conn.close()
 
