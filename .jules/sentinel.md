@@ -7,3 +7,8 @@
 **Vulnerability:** The FastAPI backend used `allow_origins=["*"]` while setting `allow_credentials=True` in CORS configuration. This is a highly insecure combination that could allow Cross-Site Request Forgery (CSRF) via cross-origin requests holding credentials.
 **Learning:** Using `*` for CORS origins is dangerous when `allow_credentials` is true because it permits any site to make authenticated requests to the API on behalf of the user. Most modern frameworks block this outright, but when bypassing those protections or configuring manually, it is a significant risk.
 **Prevention:** Always restrict `allow_origins` to a specific list of trusted origins (like the frontend application's URL) when `allow_credentials=True`. Use environment variables to handle different environments (e.g., local dev vs. production).
+
+## 2024-05-24 - Confused Deputy Vulnerability in Google OAuth
+**Vulnerability:** Google OAuth `id_token` verification was missing `aud` (audience) claim validation. This could allow a malicious application to request an `id_token` on behalf of a user and use it to authenticate to our application (Confused Deputy vulnerability).
+**Learning:** `token_info` from Google contains the `aud` claim, which must be verified against our expected Google Client ID to ensure the token was intended for our application.
+**Prevention:** Always verify the `aud` claim matches the registered OAuth Client ID when validating third-party `id_token`s. Fail closed (500 error) if the expected Client ID is missing in the configuration.
