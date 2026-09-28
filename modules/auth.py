@@ -219,6 +219,16 @@ def get_topic_progress(user_id):
     return [dict(r) for r in rows]
 
 
+def get_specific_topic_progress(user_id, subject, topic):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT subject, topic, mastery_score, last_updated FROM topic_progress WHERE user_id = ? AND subject = ? AND topic = ?",
+        (user_id, subject, topic)
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def save_flashcards(user_id, document_id, cards: list):
     conn = get_conn()
     for card in cards:
