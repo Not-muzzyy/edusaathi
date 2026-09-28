@@ -7,3 +7,6 @@
 ## 2026-09-07 - N+1 Query in Bulk Updates
 **Learning:** In backend endpoints performing bulk status changes (like rescheduling multiple tasks), avoid fetching the target IDs with a `SELECT` and then looping in application logic to execute `UPDATE` statements for each item. This creates an N+1 query bottleneck.
 **Action:** Use a single bulk `UPDATE` SQL statement specifying the exact criteria in the `WHERE` clause, and use `cursor.rowcount` to determine the number of updated records.
+## 2024-10-25 - Replace in-memory filtering with targeted SQL queries
+**Learning:** In backend operations that require a single specific record, fetching the entire list of user records and doing in-memory filtering (e.g. `get_topic_progress`) creates unnecessary I/O and memory overhead, especially for users with extensive histories.
+**Action:** Always write a targeted SQL query (e.g. `get_specific_topic_progress`) to fetch only the required record.
