@@ -7,3 +7,6 @@
 ## 2026-09-07 - N+1 Query in Bulk Updates
 **Learning:** In backend endpoints performing bulk status changes (like rescheduling multiple tasks), avoid fetching the target IDs with a `SELECT` and then looping in application logic to execute `UPDATE` statements for each item. This creates an N+1 query bottleneck.
 **Action:** Use a single bulk `UPDATE` SQL statement specifying the exact criteria in the `WHERE` clause, and use `cursor.rowcount` to determine the number of updated records.
+## 2024-05-14 - Python vs SQLite Memory Performance
+**Learning:** In the Python backend, filtering complete datasets fetched via functions like `get_topic_progress()` causes unnecessary memory load and loops when checking conditions like `subject` and `topic`.
+**Action:** Always prefer fetching single target records directly with targeted SQL `SELECT` queries for faster, O(1) matching.
