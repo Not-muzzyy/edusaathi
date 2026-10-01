@@ -7,3 +7,6 @@
 ## 2026-09-07 - N+1 Query in Bulk Updates
 **Learning:** In backend endpoints performing bulk status changes (like rescheduling multiple tasks), avoid fetching the target IDs with a `SELECT` and then looping in application logic to execute `UPDATE` statements for each item. This creates an N+1 query bottleneck.
 **Action:** Use a single bulk `UPDATE` SQL statement specifying the exact criteria in the `WHERE` clause, and use `cursor.rowcount` to determine the number of updated records.
+## 2024-10-01 - O(N) Array Filter vs Targeted Query
+**Learning:** When fetching data to process analytics or track progress (e.g., updating mastery score for a specific subject/topic), fetching the entire dataset for a user (via `get_topic_progress`) and then filtering it in memory with `next(...)` results in unnecessary memory usage and an O(N) array scan. This becomes a bottleneck as the user completes more quizzes.
+**Action:** Use a targeted SQL `SELECT` query (`get_single_topic_progress`) to fetch exactly one record directly from the database instead of loading and filtering the full dataset in Python application logic.
