@@ -1,5 +1,5 @@
 """modules/progress_tracker.py — Analytics computations."""
-from modules.auth import get_quiz_history, get_topic_progress, upsert_topic_progress
+from modules.auth import get_quiz_history, get_topic_progress, get_single_topic_progress, upsert_topic_progress
 import json
 
 
@@ -8,8 +8,13 @@ def update_progress_from_result(user_id, subject, topic, score, total):
     if total == 0:
         return
     new_score = score / total
-    existing = get_topic_progress(user_id)
-    old = next((r for r in existing if r["subject"] == subject and r["topic"] == topic), None)
+
+    # ⚡ Bolt Performance Optimization:
+    # 💡 What: Replaced fetching all topic progress records with a targeted SQL SELECT query.
+    # 🎯 Why: Previously, `get_topic_progress` fetched the entire progress dataset into memory just to find one specific record. This causes a memory and I/O bottleneck as the user's progress history grows.
+    # 📊 Impact: O(N) database-to-memory transfer and O(N) application-side filtering is reduced to an O(1) targeted database lookup.
+    old = get_single_topic_progress(user_id, subject, topic)
+
     if old:
         mastery = round(0.7 * old["mastery_score"] + 0.3 * new_score, 3)
     else:
