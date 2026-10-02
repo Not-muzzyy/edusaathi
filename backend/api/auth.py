@@ -57,6 +57,24 @@ def google_login(req: GoogleLoginRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Google token validation error: {str(e)}")
 
+    # SECURITY: Verify the audience to prevent Confused Deputy attacks
+    client_id = os.environ.get("VITE_GOOGLE_CLIENT_ID") or os.environ.get("GOOGLE_CLIENT_ID")
+    if not client_id:
+        raise HTTPException(status_code=500, detail="Server configuration error: Missing Google Client ID")
+
+    aud = token_info.get("aud")
+    if not aud:
+        raise HTTPException(status_code=400, detail="Google token missing audience (aud) claim")
+
+    if isinstance(aud, list):
+        if client_id not in aud:
+            raise HTTPException(status_code=400, detail="Invalid token audience")
+    elif isinstance(aud, str):
+        if aud != client_id:
+            raise HTTPException(status_code=400, detail="Invalid token audience")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid format for audience claim")
+
     # Verify basic token claims
     email = token_info.get("email")
     email_verified = token_info.get("email_verified")
