@@ -62,6 +62,24 @@ def google_login(req: GoogleLoginRequest):
     email_verified = token_info.get("email_verified")
     name = token_info.get("name", "Google User")
     
+    if not req.is_access_token:
+        aud = token_info.get("aud")
+        expected_client_id = os.environ.get("VITE_GOOGLE_CLIENT_ID") or os.environ.get("GOOGLE_CLIENT_ID")
+        if not expected_client_id:
+            raise HTTPException(status_code=500, detail="OAuth client ID not configured on server")
+
+        if not aud:
+            raise HTTPException(status_code=400, detail="Google token missing audience claim")
+
+        if isinstance(aud, str):
+            if aud != expected_client_id:
+                raise HTTPException(status_code=400, detail="Invalid token audience")
+        elif isinstance(aud, list):
+            if expected_client_id not in aud:
+                raise HTTPException(status_code=400, detail="Invalid token audience")
+        else:
+            raise HTTPException(status_code=400, detail="Invalid token audience format")
+
     if not email:
         raise HTTPException(status_code=400, detail="Google token does not contain email")
         
