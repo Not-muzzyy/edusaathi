@@ -7,3 +7,6 @@
 ## 2026-09-07 - N+1 Query in Bulk Updates
 **Learning:** In backend endpoints performing bulk status changes (like rescheduling multiple tasks), avoid fetching the target IDs with a `SELECT` and then looping in application logic to execute `UPDATE` statements for each item. This creates an N+1 query bottleneck.
 **Action:** Use a single bulk `UPDATE` SQL statement specifying the exact criteria in the `WHERE` clause, and use `cursor.rowcount` to determine the number of updated records.
+## 2026-10-03 - Fetching Whole Tables for Single Value Retrieval
+**Learning:** In the Python backend, fetching an entire dataset for a user (like all `topic_progress` records) into memory just to use Python's `next()` with a filter condition to find one specific record is an anti-pattern. This wastes memory and DB I/O as the dataset grows.
+**Action:** Use a targeted SQL `SELECT` query with a specific `WHERE` clause to retrieve just the single needed record, performing filtering in the database rather than in application logic.
